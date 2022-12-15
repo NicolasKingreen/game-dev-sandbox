@@ -5,6 +5,7 @@ from random import randint
 from math import exp
 
 
+from colors import *
 from slider import Slider
 
 
@@ -15,6 +16,9 @@ RENDER_SIZE = int(WIN_SIZE[0] * SPLIT_SCREEN_COEFFICIENT), WIN_SIZE[1]
 UI_SIZE = int(WIN_SIZE[0] * (1 - SPLIT_SCREEN_COEFFICIENT)), WIN_SIZE[1]
 
 TARGET_FPS = 60
+
+
+# TODO: labels, slider functionality
 
 
 def lerp(start, end, time):
@@ -32,6 +36,7 @@ def smooth_over(dt, smooth_time, convergence_fraction):
 
 
 def main():
+    pygame.init()
     pygame.display.set_caption("Game Dev Sandbox")
     display_surface = pygame.display.set_mode(WIN_SIZE)
     render_surface = pygame.Surface((WIN_SIZE[0] * 0.75, WIN_SIZE[1]))
@@ -46,9 +51,20 @@ def main():
     current_time = 0
 
     animation_time_slider = Slider(pygame.Rect(UI_SIZE[0] * 0.05,
-                                               15,
+                                               30,
                                                UI_SIZE[0] * 0.9,
-                                               25))
+                                               25),
+                                   min_value=0,
+                                   max_value=1000,
+                                   init_value=500)
+
+    rate_slider = Slider(pygame.Rect(UI_SIZE[0] * 0.05,
+                                     85,
+                                     UI_SIZE[0] * 0.9,
+                                     25),
+                         min_value=0.001,
+                         max_value=0.01,
+                         init_value=0.005)
 
     while True:
         frame_time = clock.tick(TARGET_FPS)  # ms
@@ -75,11 +91,15 @@ def main():
         x = lerp(x, x1, 0.005 * frame_time)
         y = lerp(y, y1, 0.005 * frame_time)
 
-        render_surface.fill((255, 255, 255))
-        pygame.draw.circle(render_surface, (0, 0, 0), (x, y), 10)
+        animation_time_slider.update()
+        rate_slider.update()
 
-        ui_surface.fill((137, 137, 137))
+        render_surface.fill(WHITE)
+        pygame.draw.circle(render_surface, PURPLE_NAVY, (x, y), 10)
+
+        ui_surface.fill(AZURE_X11_WEB_COLOR)
         animation_time_slider.draw(ui_surface)
+        rate_slider.draw(ui_surface)
 
         display_surface.blit(render_surface, (0, 0))
         display_surface.blit(ui_surface, (WIN_SIZE[0] * 0.75, 0))
