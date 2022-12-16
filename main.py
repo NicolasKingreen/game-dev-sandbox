@@ -49,6 +49,7 @@ def main():
 
     animation_time = 500  # ms
     current_time = 0
+    smooth_time = 5
     rate = 0.005
 
     animation_time_slider = Slider(pygame.Rect(UI_SIZE[0] * 0.05,
@@ -67,6 +68,14 @@ def main():
                          max_value=0.01,
                          init_value=0.005)
 
+    smooth_time_slider = Slider(pygame.Rect(UI_SIZE[0] * 0.05,
+                                            140,
+                                            UI_SIZE[0] * 0.9,
+                                            25),
+                                min_value=0,
+                                max_value=10,
+                                init_value=5)
+
     while True:
         frame_time = clock.tick(TARGET_FPS)  # ms
         current_time += frame_time
@@ -84,11 +93,13 @@ def main():
                     mx -= RENDER_SIZE[0]  # surface offset
                     animation_time_slider.handle_click(mx, my)
                     rate_slider.handle_click(mx, my)
+                    smooth_time_slider.handle_click(mx, my)
             elif event.type == MOUSEBUTTONUP:
                 if event.button == 1:
                     # ui surface
                     animation_time_slider.handle_release()
                     rate_slider.handle_release()
+                    smooth_time_slider.handle_release()
 
         if current_time >= animation_time:
             current_time = 0
@@ -101,13 +112,18 @@ def main():
         # y = lerp(y, y1, current_time / animation_time)
 
         # TODO: frame time independence
-        x = lerp(x, x1, rate * frame_time)
-        y = lerp(y, y1, rate * frame_time)
+        # x = lerp(x, x1, rate * frame_time)
+        # y = lerp(y, y1, rate * frame_time)
+
+        x = lerp(x, x1, smooth_over(frame_time / 1000, smooth_time, 0.95))
+        y = lerp(y, y1, smooth_over(frame_time / 1000, smooth_time, 0.95))
 
         animation_time_slider.update()
         animation_time = animation_time_slider.value
         rate_slider.update()
         rate = rate_slider.value
+        smooth_time_slider.update()
+        smooth_time = smooth_time_slider.value
 
         render_surface.fill(WHITE)
         pygame.draw.circle(render_surface, PURPLE_NAVY, (x1, y1), 15, 2)
@@ -116,6 +132,7 @@ def main():
         ui_surface.fill(AZURE_X11_WEB_COLOR)
         animation_time_slider.draw(ui_surface)
         rate_slider.draw(ui_surface)
+        smooth_time_slider.draw(ui_surface)
 
         display_surface.blit(render_surface, (0, 0))
         display_surface.blit(ui_surface, (WIN_SIZE[0] * 0.75, 0))
