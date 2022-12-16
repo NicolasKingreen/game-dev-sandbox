@@ -55,7 +55,7 @@ def main():
                                                30,
                                                UI_SIZE[0] * 0.9,
                                                25),
-                                   min_value=0,
+                                   min_value=250,
                                    max_value=1000,
                                    init_value=500)
 
@@ -77,6 +77,18 @@ def main():
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     return
+            elif event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    # ui surface
+                    mx, my = event.pos
+                    mx -= RENDER_SIZE[0]  # surface offset
+                    animation_time_slider.handle_click(mx, my)
+                    rate_slider.handle_click(mx, my)
+            elif event.type == MOUSEBUTTONUP:
+                if event.button == 1:
+                    # ui surface
+                    animation_time_slider.handle_release()
+                    rate_slider.handle_release()
 
         if current_time >= animation_time:
             current_time = 0

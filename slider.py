@@ -47,19 +47,31 @@ class Slider:
 
         self._recalculate_cursor_x()
 
+        self.grabbed = False
+
     def _get_value_type(self):
         if all(type(value) for value in [self.min_value, self.value, self.max_value]):
             return type(self.min_value)
         return float
 
     def update(self):
-        mx, my = pygame.mouse.get_pos()
-        mx -= 600  # surface offset
+        # if pygame.mouse.get_pressed()[0] and self.center_line_interaction_rect.collidepoint(mx, my):
+
         # make it happen once
-        if pygame.mouse.get_pressed()[0] and self.center_line_interaction_rect.collidepoint(mx, my):
+        if self.grabbed:
+            mx, my = pygame.mouse.get_pos()
+            mx -= 600  # surface offset
             self.value = (mx - self.center_line_x) / self.center_line_width * (self.max_value - self.min_value) + self.min_value
+            self.value = min(max(self.value, self.min_value), self.max_value)
             self._recalculate_cursor_x()
-            print(self.value)
+            # print(self.value)
+
+    def handle_click(self, mx, my):
+        if self.center_line_interaction_rect.collidepoint(mx, my):
+            self.grabbed = True
+
+    def handle_release(self):
+        self.grabbed = False
 
     def _recalculate_cursor_x(self):
         self.cursor_x = self.center_line_x + (self.value - self.min_value) / (self.max_value - self.min_value) * self.center_line_width
