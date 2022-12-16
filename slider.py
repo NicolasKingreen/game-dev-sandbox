@@ -10,7 +10,7 @@ pygame.font.init()
 DEFAULT_FONT = pygame.font.SysFont(None, 12)
 
 
-# TODO: step implementation
+# TODO: step implementation; get rid of interaction rect, make it relative
 
 
 class Slider:
@@ -57,12 +57,12 @@ class Slider:
         mx -= 600  # surface offset
         # make it happen once
         if pygame.mouse.get_pressed()[0] and self.center_line_interaction_rect.collidepoint(mx, my):
-            self.value = (mx - self.center_line_x) / self.center_line_width * self.max_value
+            self.value = (mx - self.center_line_x) / self.center_line_width * (self.max_value - self.min_value) + self.min_value
             self._recalculate_cursor_x()
             print(self.value)
 
     def _recalculate_cursor_x(self):
-        self.cursor_x = self.center_line_x + self.value / self.max_value * self.center_line_width
+        self.cursor_x = self.center_line_x + (self.value - self.min_value) / (self.max_value - self.min_value) * self.center_line_width
         self.cursor_badge_rect.midbottom = self.cursor_x, self.rect.centery - self.badge_distance
         self.value_text_surf = DEFAULT_FONT.render(str(self.round(self.value)), True, AZURE_X11_WEB_COLOR)
         self.value_text_rect = self.value_text_surf.get_rect(center=self.cursor_badge_rect.center)

@@ -18,7 +18,7 @@ UI_SIZE = int(WIN_SIZE[0] * (1 - SPLIT_SCREEN_COEFFICIENT)), WIN_SIZE[1]
 TARGET_FPS = 60
 
 
-# TODO: labels, slider functionality
+# TODO: labels, slider functionality, slider fix: make central line width the same, lerp update (rate and anim time)
 
 
 def lerp(start, end, time):
@@ -49,6 +49,7 @@ def main():
 
     animation_time = 500  # ms
     current_time = 0
+    rate = 0.005
 
     animation_time_slider = Slider(pygame.Rect(UI_SIZE[0] * 0.05,
                                                30,
@@ -88,13 +89,16 @@ def main():
         # y = lerp(y, y1, current_time / animation_time)
 
         # TODO: frame time independence
-        x = lerp(x, x1, 0.005 * frame_time)
-        y = lerp(y, y1, 0.005 * frame_time)
+        x = lerp(x, x1, rate * frame_time)
+        y = lerp(y, y1, rate * frame_time)
 
         animation_time_slider.update()
+        animation_time = animation_time_slider.value
         rate_slider.update()
+        rate = rate_slider.value
 
         render_surface.fill(WHITE)
+        pygame.draw.circle(render_surface, PURPLE_NAVY, (x1, y1), 15, 2)
         pygame.draw.circle(render_surface, PURPLE_NAVY, (x, y), 10)
 
         ui_surface.fill(AZURE_X11_WEB_COLOR)
