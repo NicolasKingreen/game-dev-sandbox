@@ -1,25 +1,27 @@
 import pygame
 
 
+from settings import *
 from colors import *
+from font import DEFAULT_FONT
 
 FIRST_COLOR = MAXIMUM_BLUE_PURPLE
 SECONDARY_COLOR = PURPLE_NAVY
-
-pygame.font.init()
-DEFAULT_FONT = pygame.font.SysFont(None, 12)
 
 
 # TODO: step implementation; get rid of interaction rect, make it relative
 
 
 class Slider:
-    def __init__(self, rect, min_value, max_value, init_value=0.0):
+    def __init__(self, rect, min_value, max_value, init_value=None):
         self.rect = rect
 
         self.min_value = min_value
         self.max_value = max_value
-        self.value = init_value
+        self.value = init_value if init_value is not None else (self.min_value + self.max_value) // 2
+
+        if not self.min_value <= self.value <= self.max_value:
+            raise ValueError
 
         self.height = 4  # central line
         self.cursor_radius = 6
@@ -54,13 +56,13 @@ class Slider:
             return type(self.min_value)
         return float
 
-    def update(self):
+    def update(self, mouse_pos):
         # if pygame.mouse.get_pressed()[0] and self.center_line_interaction_rect.collidepoint(mx, my):
 
         # make it happen once
         if self.grabbed:
-            mx, my = pygame.mouse.get_pos()
-            mx -= 600  # surface offset
+            mx, my = mouse_pos
+            # mx -= 600  # surface offset  # TODO: take it out
             self.value = (mx - self.center_line_x) / self.center_line_width * (self.max_value - self.min_value) + self.min_value
             self.value = min(max(self.value, self.min_value), self.max_value)
             self._recalculate_cursor_x()
@@ -70,7 +72,7 @@ class Slider:
         if self.center_line_interaction_rect.collidepoint(mx, my):
             self.grabbed = True
 
-    def handle_release(self):
+    def grab_release(self):
         self.grabbed = False
 
     def _recalculate_cursor_x(self):
@@ -104,5 +106,6 @@ class Slider:
         surface.blit(self.max_value_text_surf, self.max_value_text_rect)
 
         # debug rects
-        # pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)
-        # pygame.draw.rect(surface, (255, 0, 0), self.center_line_interaction_rect, 1)
+        if DRAW_DEBUG:
+            pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)
+            pygame.draw.rect(surface, (255, 0, 0), self.center_line_interaction_rect, 1)
