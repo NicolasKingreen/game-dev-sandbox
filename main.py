@@ -22,6 +22,7 @@ TARGET_FPS = 0
 
 # TODO: labels, slider functionality, slider fix: make central line width the same no matter labels width,
 # TODO: lerp update (rate and anim time), ui elements packing
+# TODO: make slider and it's lable grouping
 # smooth time gotta be less than animation time
 
 
@@ -30,9 +31,9 @@ def lerp(start, end, time):
     return start * (1 - time) + end * time
 
 
-def lerp2(start, end, log_rate, frame_time):
+def lerp2(start, end, log_rate, frame_time_ms):
     rate = exp(log_rate)
-    return lerp(end, start, exp(-rate * frame_time))
+    return lerp(end, start, exp(-rate * frame_time_ms / 1000))
 
 
 def smooth_over(dt, smooth_time, convergence_fraction):
@@ -54,7 +55,7 @@ def main():
     animation_time = 1000  # ms
     current_time = 0
     smooth_time = 250
-    rate = 0.005
+    rate = 2
 
     padding = 10
     label_height = 20
@@ -77,13 +78,13 @@ def main():
                                           label_height + slider_height + padding * 3,
                                           UI_SIZE[0] * 0.9,
                                           label_height),
-                              "Rate (not working)")
+                              "Log Rate (for lerp2)")
     rate_slider = Slider(pygame.Rect(UI_SIZE[0] * 0.05,
                                      label_height * 2 + slider_height + padding * 4,
                                      UI_SIZE[0] * 0.9,
                                      slider_height),
-                         min_value=0.001,
-                         max_value=0.01,
+                         min_value=-4.00,
+                         max_value=4.00,
                          init_value=rate)
 
     smooth_time_label = Label(pygame.Rect(UI_SIZE[0] * 0.05,
@@ -159,8 +160,13 @@ def main():
         # x = lerp(x, x1, rate * frame_time)
         # y = lerp(y, y1, rate * frame_time)
 
-        x = lerp(x, x1, smooth_over(frame_time_ms, smooth_time, 0.95))
-        y = lerp(y, y1, smooth_over(frame_time_ms, smooth_time, 0.95))
+        # log rate (roughly -4..4)
+        x = lerp2(x, x1, rate, frame_time_ms)
+        y = lerp2(y, y1, rate, frame_time_ms)
+
+        # anim time and smooth time
+        # x = lerp(x, x1, smooth_over(frame_time_ms, smooth_time, 0.95))
+        # y = lerp(y, y1, smooth_over(frame_time_ms, smooth_time, 0.95))
 
         # rendering
 
